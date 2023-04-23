@@ -23,7 +23,6 @@ def get_start_sleep_time(df):
     df['hour'] = pd.to_datetime(df['hour'], format='%H:%M')
     df['hour'] = df['hour'].dt.strftime('%H:%M')
 
-
     # Convert 'hour' column to datetime objects
     df['hour'] = pd.to_datetime(df['hour'], format='%H:%M').dt.time
 
@@ -47,7 +46,7 @@ def get_data_value_minutes(df):
     # Set 'dateTime' as the index of the DataFrame
     df.set_index('dateTime', inplace=True)
 
-    # Extract 'hour' from 'value' column
+    # Extract 'minutes' from 'value' column
     df.loc[:, 'minutes'] = df['data'].apply(lambda x: x['value'])
 
     # Drop the 'data' and 'type' columns
@@ -63,6 +62,24 @@ def get_data_value_minutes(df):
 
     # Sort the DataFrame by the 'new_hour' column
     df.sort_values(by='hours_minutes', inplace=True)
+    return df
+
+
+def get_data_value_score(df):
+    # Convert 'dateTime' column to datetime objects
+    df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
+
+    # Set 'dateTime' as the index of the DataFrame
+    df.set_index('dateTime', inplace=True)
+
+    # Extract 'score' from 'value' column
+    df.loc[:, 'score'] = df['data'].apply(lambda x: x['value'])
+
+    # Drop the 'data' and 'type' columns
+    df.drop(['data', 'type'], axis=1, inplace=True)
+
+    # Sort the DataFrame by the 'new_hour' column
+    df.sort_values(by='score', inplace=True)
     return df
 
 
@@ -136,3 +153,12 @@ minutesAwake_df = get_data_value_minutes(minutesAwake_df)
 y_column = minutesAwake_df['hours_minutes']
 y_labels = minutesAwake_df['hours_minutes']
 streamlit_sleep_charts(minutesAwake_df,y_column, y_labels, 'Time (hh mm)', 'Total minutes awake')
+
+
+# efficiency score
+efficiency_df = df2[df2['type'] == 'efficiency']
+efficiency_df = get_data_value_score(efficiency_df)
+y_column = efficiency_df['score']
+y_labels = efficiency_df['score']
+streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
+
