@@ -43,7 +43,7 @@ def getSleepData():
             duration = int(sleepItem['duration']) / minutes
             durationDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "value": round(duration,2)
+                "value": duration
             }
             create_data(durationDict,"sleep_duration")
 
