@@ -34,13 +34,13 @@ def create_data(dictItem,typeItem):
 def getSleepData():
 
     sleepList = df_fitbit('sleep', base_date, end_date, token)['sleep']
-    milliseconds = 3600000  
+    minutes = 60000  
 
     # Create a timedelta object with the milliseconds as the total number of microseconds
     for sleepItem in sleepList:
         mainSleep = sleepItem['isMainSleep']
         if mainSleep == True:
-            duration = int(sleepItem['duration']) / milliseconds
+            duration = int(sleepItem['duration']) / minutes
             durationDict = {
                 "dateTime": sleepItem['dateOfSleep'],
                 "value": round(duration,2)
