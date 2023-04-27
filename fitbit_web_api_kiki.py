@@ -32,163 +32,180 @@ def create_data(dictItem,typeItem):
     return data_list  
 
 def getSleepData():
-    #data to gather
+
     sleepList = df_fitbit('sleep', base_date, end_date, token)['sleep']
-    sleepDictList = []
-    milliseconds = 3600000  # Example value
+    milliseconds = 3600000  
 
     # Create a timedelta object with the milliseconds as the total number of microseconds
     for sleepItem in sleepList:
         mainSleep = sleepItem['isMainSleep']
         if mainSleep == True:
-            duration = int(sleepItem['duration']) / 3600000
+            duration = int(sleepItem['duration']) / milliseconds
             durationDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "duration": round(duration,2)
+                "value": round(duration,2)
             }
-            create_data(durationDict,"duration")
+            create_data(durationDict,"sleep_duration")
 
             startTimeDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "startTime": sleepItem['startTime']
+                "value": sleepItem['startTime']
             }
-            create_data(startTimeDict,"startTime")
+            create_data(startTimeDict,"sleep_startTime")
 
             endTimeDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "endTime": sleepItem['endTime']
+                "value": sleepItem['endTime']
             }
-            create_data(endTimeDict,"endTime")
+            create_data(endTimeDict,"sleep_endTime")
 
             timeInBedDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "timeInBed": sleepItem['timeInBed']
+                "value": sleepItem['timeInBed']
             }
             create_data(timeInBedDict,"timeInBed")
 
             minutesAsleepDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutesAsleep": sleepItem['minutesAsleep']
+                "value": sleepItem['minutesAsleep']
             }
             create_data(minutesAsleepDict,"minutesAsleep")
 
             minutesAwakeDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutesAwake": sleepItem['minutesAwake']
+                "value": sleepItem['minutesAwake']
             }
             create_data(minutesAwakeDict,"minutesAwake")
 
             efficiencyDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "efficiency": sleepItem['efficiency']
+                "value": sleepItem['efficiency']
             }
-            create_data(efficiencyDict,"efficiency")
+            create_data(efficiencyDict,"sleep_efficiency")
 
             summaryDeepDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutes": sleepItem['levels']['summary']['deep']['minutes']
+                "value": sleepItem['levels']['summary']['deep']['minutes']
             }
-            create_data(summaryDeepDict,"summaryDeep")
+            create_data(summaryDeepDict,"sleep_Deep")
 
             summaryLightDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutes": sleepItem['levels']['summary']['light']['minutes']
+                "value": sleepItem['levels']['summary']['light']['minutes']
             }
-            create_data(summaryLightDict,"summaryLight")
+            create_data(summaryLightDict,"sleep_Light")
 
             summaryRemDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutes": sleepItem['levels']['summary']['rem']['minutes']
+                "value": sleepItem['levels']['summary']['rem']['minutes']
             }
-            create_data(summaryRemDict,"summaryRem")
+            create_data(summaryRemDict,"sleep_Rem")
 
             summaryWakeDict = {
                 "dateTime": sleepItem['dateOfSleep'],
-                "minutes": sleepItem['levels']['summary']['wake']['minutes']
+                "value": sleepItem['levels']['summary']['wake']['minutes']
             }
-            create_data(summaryWakeDict,"summaryWake")
+            create_data(summaryWakeDict,"sleep_Wake")
         
         
 def getActivityData():
 
-    activityList = ['activities/minutesSedentary', 'activities/minutesLightlyActive','activities/minutesFairlyActive','activities/minutesVeryActive', 'activities/steps', 'activities/heart']
+    # List of activity types to retrieve from Fitbit API
+    activityList = ['activities/minutesSedentary', 'activities/minutesLightlyActive','activities/minutesFairlyActive',
+                    'activities/minutesVeryActive', 'activities/heart']
+    
+    # Retrieve activity data from Fitbit API for specified date range and activity types
     minutesSedentary = df_fitbit(activityList[0], base_date, end_date, token)['activities-minutesSedentary']
-
     minutesLightlyActive = df_fitbit(activityList[1], base_date, end_date, token)['activities-minutesLightlyActive']
-
     minutesFairlyActive = df_fitbit(activityList[2], base_date, end_date, token)['activities-minutesFairlyActive']
-
     minutesVeryActive = df_fitbit(activityList[3], base_date, end_date, token)['activities-minutesVeryActive']
-
-    heartRate = df_fitbit(activityList[5], base_date, end_date, token)['activities-heart']
+    heartRate = df_fitbit(activityList[4], base_date, end_date, token)['activities-heart']
+    
+    # Loop through sedentary minutes data and create new data entries for each type of activity
     for sedentary in minutesSedentary:
         datetimeSed = sedentary['dateTime']
         totalTime = int(sedentary['value'])
         
+        # Find matching heart rate data for the sedentary minute and add to the total time
         for heart in heartRate:
             if heart['dateTime'] == datetimeSed:
                 if totalTime == 1440:
                     totalTime = 0
                 minutesSedentary = {
                     "dateTime": datetimeSed, 
-                    "minutesSedentary": totalTime, 
+                    "value": totalTime, 
                     } 
                 create_data(minutesSedentary,"minutesSedentary")
 
+                # Find matching lightly active minutes data for the sedentary minute and add to the total time
                 for lightlyActive in minutesLightlyActive:
                     if not isinstance(lightlyActive, str) and datetimeSed == lightlyActive['dateTime']:
                         minutesLightlyActive = {
                             "dateTime": datetimeSed, 
-                            "minutesLightlyActive": int(lightlyActive['value']), 
+                            "value": int(lightlyActive['value']), 
                             } 
                         create_data(minutesLightlyActive,"minutesLightlyActive")
 
                         totalTime += int(lightlyActive['value'])
                 
+                # Find matching fairly active minutes data for the sedentary minute and add to the total time
                 for fairlyActive in minutesFairlyActive:
                     if not isinstance(fairlyActive, str) and datetimeSed == fairlyActive['dateTime']:
                         minutesFairlyActive = {
                             "dateTime": datetimeSed, 
-                            "minutesFairlyActive": int(fairlyActive['value']), 
+                            "value": int(fairlyActive['value']), 
                             } 
                         create_data(minutesFairlyActive,"minutesFairlyActive")
 
                         totalTime += int(fairlyActive['value'])
 
+                # Find matching very active minutes data for the sedentary minute and add to the total time
                 for veryActive in minutesVeryActive:
                     if not isinstance(veryActive, str) and datetimeSed == veryActive['dateTime']:
                         minutesVeryActive = {
                             "dateTime": datetimeSed, 
-                            "minutesVeryActive": int(veryActive['value']), 
+                            "value": int(veryActive['value']), 
                             } 
                         create_data(minutesVeryActive,"minutesVeryActive")
                     
                         totalTime += int(veryActive['value'])
 
+        # Create a new data entry for total wear time for the day
         activityDict = {
             "dateTime": datetimeSed, 
-            "totalWearTime": totalTime, 
+            "value": totalTime, 
             }    
     
         create_data(activityDict,"totalWearTime")
 
+
 def getStepsData():
+    # Get steps count data from the Fitbit API for the specified date range
     steps_count = df_fitbit('activities/steps', base_date, end_date, token)['activities-steps']
 
+    # Initialize an empty list to store the dates with over 10,000 steps
     highly_active_days = []
+
+    # Loop through each item in the steps count data
     for i in range(0, len(steps_count)):
+        # Get the number of steps and the date for the current item
         steps = steps_count[i].get('value')
+        date = steps_count[i].get('dateTime')
+        
+        # Create a dictionary for the steps count data for the current date
         stepsDict = {
-            "dateTime": steps_count[i].get('dateTime'), 
-            "steps": steps, 
-            }    
+            "dateTime": date, 
+            "value": steps, 
+        }
+        
         create_data(stepsDict,"steps")
 
+        # If the number of steps is over 10,000, add the date to the highly active days list
         if int(steps) >= 10000:
             highly_active_days = {
-                "dateTime": steps_count[i].get('dateTime'), 
-                "steps": steps, 
-                }    
+                "dateTime": date, 
+                "value": steps, 
+            }    
             create_data(stepsDict,"highly_active_days")
 
 if __name__ == "__main__":
