@@ -37,15 +37,13 @@ def get_start_sleep_time(df):
 
 
 def get_data_value_minutes(df):
+
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
-
     # Set 'dateTime' as the index of the DataFrame
     df.set_index('dateTime', inplace=True)
-
-    # Extract 'minutes' from 'value' column
+    # Extract value from data - value
     df.loc[:, 'value'] = df['data'].apply(lambda x: x['value'])
-
     # Drop the 'data' and 'type' columns
     df.drop(['data', 'type'], axis=1, inplace=True)
 
@@ -175,75 +173,64 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     st.pyplot(fig)
 
 
-# Connect to MongoDB
-client = pymongo.MongoClient()
-db = client.fitbitDB
-collection = db.fitbitCollection
+if __name__ == "__main__":
 
-# save the documents in a dataframe
-df = pd.DataFrame(list(collection.find()))
-# drop the _id and id fields, not needed
-df1 = df.drop(['_id'], axis=1)
-df2 = df1.drop(['id'], axis=1)
+    # Connect to MongoDB
+    client = pymongo.MongoClient()
+    db = client.fitbitDB
+    collection = db.fitbitCollection
 
+    # save the documents in a dataframe
+    df = pd.DataFrame(list(collection.find()))
+    # drop the _id and id fields, not needed
+    df1 = df.drop(['_id'], axis=1)
+    df2 = df1.drop(['id'], axis=1)
 
-streamlit_sleep_layout()
+    streamlit_sleep_layout()
 
-# start time
-startTime_df = df2[df2['type'] == 'sleep_startTime']
-startTime_df = get_start_sleep_time(startTime_df)
-y_column = startTime_df['new_hour']
-y_labels = startTime_df['hour']
-streamlit_sleep_charts(startTime_df, y_column, y_labels, 'Time (HH:MM)', 'Sleep Start time')
+    # start time
+    startTime_df = df2[df2['type'] == 'sleep_startTime']
+    startTime_df = get_start_sleep_time(startTime_df)
+    y_column = startTime_df['new_hour']
+    y_labels = startTime_df['hour']
+    streamlit_sleep_charts(startTime_df, y_column, y_labels, 'Time (HH:MM)', 'Sleep Start time')
 
-# time in bed
-timeInBed_df = df2[df2['type'] == 'timeInBed']
-timeInBed_df = get_data_value_minutes(timeInBed_df)
-y_column = timeInBed_df['hours_minutes']
-y_labels = timeInBed_df['hours_minutes']
-streamlit_sleep_charts(timeInBed_df,y_column, y_labels, 'Time (hh mm)', 'Total Time in bed')
+    # timeInBed, minutesAsleep, minutesAwake
+    types = ['timeInBed', 'minutesAsleep', 'minutesAwake']
+    titles = ['Total Time in bed', 'Total minutes asleep', 'Total minutes awake']
+    for idx, x in enumerate(types):
+        df = pd.DataFrame()
+        df = df2[df2['type'] == x]
+        df = get_data_value_minutes(df)
+        y_column = df['hours_minutes']
+        y_labels = df['hours_minutes']
+        streamlit_sleep_charts(df, y_column, y_labels, 'Time (hh mm)', titles[idx])
 
-# minutes Asleep
-minutesAsleep_df = df2[df2['type'] == 'minutesAsleep']
-minutesAsleep_df = get_data_value_minutes(minutesAsleep_df)
-y_column = minutesAsleep_df['hours_minutes']
-y_labels = minutesAsleep_df['hours_minutes']
-streamlit_sleep_charts(minutesAsleep_df,y_column, y_labels, 'Time (hh mm)', 'Total minutes asleep')
+    # efficiency
+    efficiency_df = df2[df2['type'] == 'sleep_efficiency']
+    efficiency_df = get_data_value_score(efficiency_df)
+    y_column = efficiency_df['score']
+    y_labels = efficiency_df['score']
+    streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
 
+    # deep sleep
+    sleep_Deep = df2[df2['type'] == 'sleep_Deep']
+    deep_sleep = minutes_in_hours_minutes(sleep_Deep)
 
-# minutes Awake
-minutesAwake_df = df2[df2['type'] == 'minutesAwake']
-minutesAwake_df = get_data_value_minutes(minutesAwake_df)
-y_column = minutesAwake_df['hours_minutes']
-y_labels = minutesAwake_df['hours_minutes']
-streamlit_sleep_charts(minutesAwake_df,y_column, y_labels, 'Time (hh mm)', 'Total minutes awake')
+    # light sleep
+    sleep_Light = df2[df2['type'] == 'sleep_Light']
+    light_sleep = minutes_in_hours_minutes(sleep_Light)
 
+    # rem sleep
+    sleep_Rem = df2[df2['type'] == 'sleep_Rem']
+    rem_sleep = minutes_in_hours_minutes(sleep_Rem)
 
-# efficiency
-efficiency_df = df2[df2['type'] == 'sleep_efficiency']
-efficiency_df = get_data_value_score(efficiency_df)
-y_column = efficiency_df['score']
-y_labels = efficiency_df['score']
-streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
+    # wake sleep
+    sleep_Wake = df2[df2['type'] == 'sleep_Wake']
+    awake_sleep = minutes_in_hours_minutes(sleep_Wake)
 
-# deep sleep
-sleep_Deep = df2[df2['type'] == 'sleep_Deep']
-deep_sleep = minutes_in_hours_minutes(sleep_Deep)
+    # sleep duration
+    sleep_duration = df2[df2['type'] == 'sleep_duration']
+    duration = minutes_in_hours_minutes(sleep_duration)
 
-# light sleep
-sleep_Light = df2[df2['type'] == 'sleep_Light']
-light_sleep = minutes_in_hours_minutes(sleep_Light)
-
-# rem sleep
-sleep_Rem = df2[df2['type'] == 'sleep_Rem']
-rem_sleep = minutes_in_hours_minutes(sleep_Rem)
-
-# wake sleep
-sleep_Wake = df2[df2['type'] == 'sleep_Wake']
-awake_sleep = minutes_in_hours_minutes(sleep_Wake)
-
-# sleep duration
-sleep_duration = df2[df2['type'] == 'sleep_duration']
-duration = minutes_in_hours_minutes(sleep_duration)
-
-streamlit_sleep_stages_chart(duration,deep_sleep,light_sleep, rem_sleep, awake_sleep)
+    streamlit_sleep_stages_chart(duration,deep_sleep,light_sleep, rem_sleep, awake_sleep)
