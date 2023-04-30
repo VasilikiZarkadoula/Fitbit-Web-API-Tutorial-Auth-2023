@@ -120,7 +120,6 @@ def getActivityData():
     minutesFairlyActive = df_fitbit(activityList[2], base_date, end_date, token)['activities-minutesFairlyActive']
     minutesVeryActive = df_fitbit(activityList[3], base_date, end_date, token)['activities-minutesVeryActive']
     heartRate = df_fitbit(activityList[4], base_date, end_date, token)['activities-heart']
-    
     # Loop through sedentary minutes data and create new data entries for each type of activity
     for sedentary in minutesSedentary:
         datetimeSed = sedentary['dateTime']
@@ -131,42 +130,43 @@ def getActivityData():
             if heart['dateTime'] == datetimeSed:
                 if totalTime == 1440:
                     totalTime = 0
-                minutesSedentary = {
+
+                minutesSedentaryDict = {
                     "dateTime": datetimeSed, 
                     "value": totalTime, 
                     } 
-                create_data(minutesSedentary,"minutesSedentary")
 
+                create_data(minutesSedentaryDict,"minutesSedentary")
                 # Find matching lightly active minutes data for the sedentary minute and add to the total time
                 for lightlyActive in minutesLightlyActive:
-                    if not isinstance(lightlyActive, str) and datetimeSed == lightlyActive['dateTime']:
-                        minutesLightlyActive = {
+                    if datetimeSed == lightlyActive['dateTime']:
+                        minutesLightlyActiveDict = {
                             "dateTime": datetimeSed, 
                             "value": int(lightlyActive['value']), 
                             } 
-                        create_data(minutesLightlyActive,"minutesLightlyActive")
+                        create_data(minutesLightlyActiveDict,"minutesLightlyActive")
 
                         totalTime += int(lightlyActive['value'])
                 
                 # Find matching fairly active minutes data for the sedentary minute and add to the total time
                 for fairlyActive in minutesFairlyActive:
-                    if not isinstance(fairlyActive, str) and datetimeSed == fairlyActive['dateTime']:
-                        minutesFairlyActive = {
+                    if datetimeSed == fairlyActive['dateTime']:
+                        minutesFairlyActiveDict = {
                             "dateTime": datetimeSed, 
                             "value": int(fairlyActive['value']), 
                             } 
-                        create_data(minutesFairlyActive,"minutesFairlyActive")
+                        create_data(minutesFairlyActiveDict,"minutesFairlyActive")
 
                         totalTime += int(fairlyActive['value'])
 
                 # Find matching very active minutes data for the sedentary minute and add to the total time
                 for veryActive in minutesVeryActive:
-                    if not isinstance(veryActive, str) and datetimeSed == veryActive['dateTime']:
-                        minutesVeryActive = {
+                    if datetimeSed == veryActive['dateTime']:
+                        minutesVeryActiveDict = {
                             "dateTime": datetimeSed, 
                             "value": int(veryActive['value']), 
                             } 
-                        create_data(minutesVeryActive,"minutesVeryActive")
+                        create_data(minutesVeryActiveDict,"minutesVeryActive")
                     
                         totalTime += int(veryActive['value'])
 
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     db = connect.fitbitDB
 
     # creating or switching to demoCollection
-    collection = db.demoCollection
+    collection = db.fitbitCollection
 
     getSleepData()
 
