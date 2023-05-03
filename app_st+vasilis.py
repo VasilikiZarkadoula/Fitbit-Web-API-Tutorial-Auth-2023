@@ -206,6 +206,7 @@ def streamlit_steps(df):
         ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom', fontdict={'size': 9})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
+    # ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
 
     # Create a line plot with the same x-axis values and the 'steps' column of the DataFrame
     ax.plot(df.index, df['steps'], color='r')
