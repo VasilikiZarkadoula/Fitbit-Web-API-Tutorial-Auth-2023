@@ -198,12 +198,12 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
 
 def streamlit_steps(df):
     # Create a figure and axis object
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12, 5))
 
     # Create a scatter plot with the DataFrame
     ax.scatter(df.index, df['steps'], color='b')
     for dateTime, row in df.iterrows():
-        ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom')
+        ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom', fontdict={'size': 9})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
 
@@ -216,8 +216,9 @@ def streamlit_steps(df):
     ax.set_xticklabels(tick_labels, rotation=90)
 
     # Set the y-axis tick locations and labels
-    ax.set_yticks(np.arange(df['steps'].min(), df['steps'].max()+10000, 1000))  # Set y-axis ticks to a range of values
-    ax.set_ylim(df['steps'].min(), df['steps'].max()+1500)  # Set y-axis limits to a range of values
+    ax.set_yticks(
+        np.arange(df['steps'].min(), df['steps'].max() + 10000, 1000))  # Set y-axis ticks to a range of values
+    ax.set_ylim(df['steps'].min(), df['steps'].max() + 1500)  # Set y-axis limits to a range of values
 
     # Set the x-axis label
     ax.set_xlabel('Date')
@@ -228,10 +229,10 @@ def streamlit_steps(df):
     # Set the title
     ax.set_title('Steps per Day')
 
-# Display the plot
-#plt.show()
+    # Display the plot
+    # plt.show()
 
-#plt.show()
+    # plt.show()
 
     ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%d'))
     plt.tight_layout()
