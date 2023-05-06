@@ -65,24 +65,6 @@ def get_data_value_minutes(df):
     return df
 
 
-def get_data_value_score(df):
-    # Convert 'dateTime' column to datetime objects
-    df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
-
-    # Set 'dateTime' as the index of the DataFrame
-    df.set_index('dateTime', inplace=True)
-
-    # Extract 'score' from 'value' column
-    df.loc[:, 'score'] = df['data'].apply(lambda x: x['value'])
-
-    # Drop the 'data' and 'type' columns
-    df.drop(['data', 'type'], axis=1, inplace=True)
-
-    # Sort the DataFrame by the 'new_hour' column
-    df.sort_values(by='score', inplace=True)
-    return df
-
-
 def get_steps_value(df):
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
@@ -126,19 +108,39 @@ def streamlit_sleep_layout():
     st.subheader('This app is a Streamlit app that retrieve mongodb data and show it in a dataframe')
 
 
-def streamlit_sleep_charts(df, y_column, y_labels, ylab, title):
+def streamlit_start_sleep_chart(df,  y_label, title):
 
-    # create a vertical bar chart using Matplotlib
+    fig = plt.figure(figsize=(12, 5))
+
+    df = df.sort_values('new_hour') # sort the DataFrame by new_hour column
+
+    plt.bar(df.index, df['new_hour'])
+
+    plt.xlabel('Date')
+    plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90, ha='center')
+
+    plt.ylabel(y_label)
+    plt.yticks(df['new_hour'], df['hour'])
+
+    plt.title(title)
+
+    plt.tight_layout()
+    st.pyplot(fig)
+
+
+def streamlit_sleep_charts(df, y_label, title):
+
     fig, ax = plt.subplots(figsize=(12, 5))
-    ax.bar(df.index, y_column)
-    ax.set_xlabel('Date')
-    ax.set_ylabel(ylab)
-    ax.set_yticklabels(y_labels.values)
-    ax.set_title(title)
-    ax.tick_params(axis='x', rotation=45)
 
-    # Set x-axis tick labels to show all dates
-    plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=45)
+    ax.bar(df.index, df['hours_minutes'])
+
+    ax.set_xlabel('Date')
+    plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90)
+
+    ax.set_ylabel(y_label)
+    ax.set_yticklabels(df['hours_minutes'].values)
+
+    ax.set_title(title)
 
     plt.tight_layout()
     st.pyplot(fig)
@@ -428,7 +430,7 @@ if __name__ == "__main__":
     streamlit_sleep_layout()
 
     # sleep duration
-    sleep_duration = df2[df2['type'] == 'sleep_duration']
+    sleep_duration = df2[df2['type'] == 'timeInBed']
     duration = minutes_in_hours_minutes(sleep_duration)
 
     # Display the selected chart in an expander
@@ -440,9 +442,7 @@ if __name__ == "__main__":
         # start time
         startTime_df = df2[df2['type'] == 'sleep_startTime']
         startTime_df = get_start_sleep_time(startTime_df)
-        y_column = startTime_df['new_hour']
-        y_labels = startTime_df['hour']
-        streamlit_sleep_charts(startTime_df, y_column, y_labels, 'Time (HH:MM)', 'Sleep Start time')
+        streamlit_start_sleep_chart(startTime_df, 'Time (HH:MM)', 'Sleep Start time')
         # timeInBed, minutesAsleep, minutesAwake
         types = ['timeInBed', 'minutesAsleep', 'minutesAwake']
         titles = ['Total Time in bed', 'Total minutes asleep', 'Total minutes awake']
@@ -450,17 +450,7 @@ if __name__ == "__main__":
             df = pd.DataFrame()
             df = df2[df2['type'] == x]
             df = get_data_value_minutes(df)
-            y_column = df['hours_minutes']
-            y_labels = df['hours_minutes']
-            streamlit_sleep_charts(df, y_column, y_labels, 'Time (hh mm)', titles[idx])
-
-        # efficiency
-        efficiency_df = df2[df2['type'] == 'sleep_efficiency']
-        efficiency_df = get_data_value_score(efficiency_df)
-        print(efficiency_df)
-        y_column = efficiency_df['score']
-        y_labels = efficiency_df['score']
-        streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
+            streamlit_sleep_charts(df,  'Time (hh mm)', titles[idx])
 
         # deep sleep
         sleep_Deep = df2[df2['type'] == 'sleep_Deep']
