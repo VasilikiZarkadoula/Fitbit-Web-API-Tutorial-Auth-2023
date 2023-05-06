@@ -5,6 +5,7 @@ import pymongo
 import streamlit as st
 from datetime import datetime, timedelta, time
 import altair as alt
+import plotly.express as px
 
 
 def get_start_sleep_time(df):
@@ -98,11 +99,22 @@ def get_steps_value(df):
     df.set_index('dateTime', inplace=True)
 
     # Convert the 'steps' column to a numeric data type
-    df['steps'] = df['steps'].astype('float')
+    df['steps'] = df['steps'].astype('int')
 
     # Sort the DataFrame by the 'dateTime' column
     df = df.sort_values(by='dateTime')
+    
+    #Make an extra column with the activity level
+    df=df.assign(activity_level = 'normal_activity')
 
+    for index, row in df.iterrows():
+        if row['steps'] > 10000:
+            df.at[index, 'activity_level'] = 'high_activity'
+        elif row['steps'] < 500 and row['steps'] != 0:
+            df.at[index, 'activity_level'] = 'low_activity'
+        elif row['steps'] == 0:
+            df.at[index, 'activity_level'] = 'not_wearing_it'
+    
     return df
 
 
@@ -231,15 +243,42 @@ def streamlit_steps(df):
     # Set the title
     ax.set_title('Steps per Day')
 
-    # Display the plot
-    # plt.show()
-
-    # plt.show()
 
     ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%d'))
     plt.tight_layout()
     # Show plot in Streamlit
     st.pyplot(fig)
+
+def streamlit_steps_pie(df):
+    # count the number of occurrences of each value in the activity_level column
+    value_counts = df['activity_level'].value_counts(normalize=True)
+
+    # create a pie chart using Matplotlib
+    fig, ax = plt.subplots()
+    ax.pie(
+        value_counts.values,
+        labels=value_counts.index,
+        autopct='%1.1f%%',
+        colors=['purple', 'green', 'blue', 'gray'],
+        startangle=90
+    )
+
+    # set the title of the chart
+    ax.set_title('Percentage of activity level based on the number of steps')
+
+    # adjust the size of the plot
+    fig.set_size_inches(6, 6)
+
+    # adjust the resolution of the plot
+    fig.set_dpi(200)
+
+    # adjust the aspect ratio of the plot to make it less zoomed in
+    ax.set_box_aspect(0.4)
+
+    # display the chart in the Streamlit app
+    plt.tight_layout()
+    st.pyplot(fig)
+    
 
 
 def get_data_value(df):
@@ -256,7 +295,7 @@ def get_data_value(df):
 
 
 def get_user_engagement(totalWearTime_df, duration_df):
-    print(totalWearTime_df)
+    
     # # Convert 'dateTime' column to datetime objects
     # totalWearTime_df.loc[:, 'dateTime'] = pd.to_datetime(totalWearTime_df['data'].apply(lambda x: x['dateTime']))
     # # Set 'dateTime' as the index of the DataFrame
@@ -359,7 +398,6 @@ if __name__ == "__main__":
     # efficiency
     efficiency_df = df2[df2['type'] == 'sleep_efficiency']
     efficiency_df = get_data_value_score(efficiency_df)
-    print(efficiency_df)
     y_column = efficiency_df['score']
     y_labels = efficiency_df['score']
     streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
@@ -391,6 +429,7 @@ if __name__ == "__main__":
     steps_df = get_steps_value(steps_df)
 
     streamlit_steps(steps_df)
+    streamlit_steps_pie(steps_df)
 
     # user engagement
     totalWearTime_df = df2[df2['type'] == 'totalWearTime']
