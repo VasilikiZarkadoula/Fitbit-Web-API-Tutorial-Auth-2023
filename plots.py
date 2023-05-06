@@ -3,34 +3,32 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import altair as alt
-from utils import get_data_value, get_activity_value
+from utils import get_df_columns, get_activity_value
 
 
 def streamlit_sleep_layout():
-    # setting the screen size
+    """
+    Set the screen size and create the layout for the sleep dashboard in Streamlit.
+    """
     st.set_page_config(layout="wide", page_title="Fitbit Data")
-    # main title
     st.title('Fitbit Sleep MongoDB')
-    # main text
     st.subheader('This app is a Streamlit app that retrieve mongodb data and show it in a dataframe')
-
 
 ######################################### sleep charts #########################################
 
 
 def streamlit_start_sleep_chart(df, y_label, title):
-    fig = plt.figure(figsize=(12, 5))
-
+    """
+    Plot a bar chart for the sleep start time from given DataFrame.
+    """
     df = df.sort_values('new_hour')  # sort the DataFrame by new_hour column
 
+    fig = plt.figure(figsize=(12, 5))
     plt.bar(df.index, df['new_hour'])
-
     plt.xlabel('Date')
     plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90, ha='center')
-
     plt.ylabel(y_label)
     plt.yticks(df['new_hour'], df['hour'])
-
     plt.title(title)
 
     plt.tight_layout()
@@ -38,16 +36,15 @@ def streamlit_start_sleep_chart(df, y_label, title):
 
 
 def streamlit_sleep_charts(df, y_label, title):
+    """
+    Plot a bar chart for the sleep duration from given DataFrame.
+    """
     fig, ax = plt.subplots(figsize=(12, 5))
-
     ax.bar(df.index, df['hours_minutes'])
-
     ax.set_xlabel('Date')
     plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90)
-
     ax.set_ylabel(y_label)
     ax.set_yticklabels(df['hours_minutes'].values)
-
     ax.set_title(title)
 
     plt.tight_layout()
@@ -55,6 +52,9 @@ def streamlit_sleep_charts(df, y_label, title):
 
 
 def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, awake_sleep):
+    """
+    Plot a bar chart for the different stages of sleep from given DataFrame.
+    """
     # sort the dates
     duration = duration.sort_index()
     light_sleep = light_sleep.sort_index()
@@ -83,75 +83,61 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     ax.bar(r4, rem_sleep, width=bar_width, label='REM Sleep')
     ax.bar(r5, awake_sleep, width=bar_width, label='Wake Sleep')
 
-    # add x-axis ticks and labels
     ax.set_xticks(r2)
     ax.set_xticklabels(dates, rotation=90)
     ax.set_xlabel('Date')
-
-    # add y-axis label
     ax.set_ylabel('Hours')
-
-    # add chart title
     ax.set_title('Sleep Data')
-
-    # add legend
     ax.legend()
 
-    # show the plot
     plt.tight_layout()
     st.pyplot(fig)
 
-
 ######################################### user engagement charts #########################################
-
 
 ####### steps charts ########
 
 def streamlit_steps(df):
-    # Create a figure and axis object
-    fig, ax = plt.subplots(figsize=(12, 5))
+    """
+    Plots a scatter plot with the steps taken per day, along with a line plot
+    that connects the dots and horizontal lines at 10000 and 500 steps.
+    """
 
-    # Create a scatter plot with the DataFrame
-    ax.scatter(df.index, df['steps'], color='b')
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.scatter(df.index, df['value'], color='b')
+
     for dateTime, row in df.iterrows():
-        ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom', fontdict={'size': 9})
+        ax.text(dateTime, row['value'], str(int(row['value'])), ha='center', va='bottom', fontdict={'size': 9})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
     ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
 
     # Create a line plot with the same x-axis values and the 'steps' column of the DataFrame
-    ax.plot(df.index, df['steps'], color='r')
+    ax.plot(df.index, df['value'], color='r')
 
-    # Set the x-axis tick locations and labels
     tick_labels = df.index.strftime('%Y-%m-%d')
     ax.set_xticks(df.index)
-    ax.set_xticklabels(tick_labels, rotation=90)
-
-    # Set the y-axis tick locations and labels
-    ax.set_yticks(
-        np.arange(df['steps'].min(), df['steps'].max() + 10000, 1000))  # Set y-axis ticks to a range of values
-    ax.set_ylim(df['steps'].min(), df['steps'].max() + 1500)  # Set y-axis limits to a range of values
-
-    # Set the x-axis label
     ax.set_xlabel('Date')
-
-    # Set the y-axis label
+    ax.set_xticklabels(tick_labels, rotation=90)
+    ax.set_yticks(
+        np.arange(df['value'].min(), df['value'].max() + 10000, 1000))  # Set y-axis ticks to a range of values
+    ax.set_ylim(df['value'].min(), df['value'].max() + 1500)  # Set y-axis limits to a range of values
     ax.set_ylabel('Steps')
-
-    # Set the title
+    ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%d'))
     ax.set_title('Steps per Day')
 
-    ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%d'))
     plt.tight_layout()
-    # Show plot in Streamlit
     st.pyplot(fig)
 
 
 def streamlit_steps_pie(df):
+    """
+    Creates a pie chart that displays the percentage of activity level based
+    on the number of steps.
+    """
     # count the number of occurrences of each value in the activity_level column
     value_counts = df['activity_level'].value_counts(normalize=True)
 
-    # create a pie chart using Matplotlib
     fig, ax = plt.subplots()
     ax.pie(
         value_counts.values,
@@ -160,48 +146,41 @@ def streamlit_steps_pie(df):
         colors=['purple', 'green', 'blue', 'gray'],
         startangle=90
     )
-
-    # set the title of the chart
     ax.set_title('Percentage of activity level based on the number of steps')
+    ax.set_box_aspect(0.4)  # adjust the aspect ratio of the plot to make it less zoomed in
+    fig.set_size_inches(6, 6)  # adjust the size of the plot
+    fig.set_dpi(200)  # adjust the resolution of the plot
 
-    # adjust the size of the plot
-    fig.set_size_inches(6, 6)
-
-    # adjust the resolution of the plot
-    fig.set_dpi(200)
-
-    # adjust the aspect ratio of the plot to make it less zoomed in
-    ax.set_box_aspect(0.4)
-
-    # display the chart in the Streamlit app
     plt.tight_layout()
     st.pyplot(fig)
 
 
 ####### activity charts ########
 
-
 def streamlit_user_engagement_chart(totalWearTime_df, duration_df):
-
-    new_totalWearTime_df = get_data_value(totalWearTime_df)
+    """
+    Generates a bar chart showing the user's total wear time and sleep duration per day.
+    """
+    new_totalWearTime_df = get_df_columns(totalWearTime_df, True)
     new_totalWearTime_df['total_wear_time'] = round(new_totalWearTime_df['value'] / 60, 2)
 
-    new_duration_df = duration_df.applymap(lambda x: x // 60 + (x % 60) / 100)
+    new_duration_df = duration_df.apply(pd.to_numeric)
+    new_duration_df = new_duration_df.applymap(lambda x: x // 60 + (x % 60) / 100)
 
     merged_df = pd.merge(new_totalWearTime_df, new_duration_df, left_index=True, right_index=True, how='outer')
     merged_df.drop(['value_x'], axis=1, inplace=True)
     merged_df = merged_df.rename(columns={'value_y': 'sleep_duration'})
 
-    # Display plot in Streamlit app
     plt.rcParams['font.size'] = 3
-
     fig, ax = plt.subplots(figsize=(6.6, 2.5))
     merged_df.plot.bar(x='dateTime', y=['total_wear_time', 'sleep_duration'], ax=ax)
     st.pyplot(fig)
 
 
 def streamlit_user_activity_chart(df):
-
+    """
+    Generates a pie chart showing the percentage of time spent in each activity level.
+    """
     minutesSedentary_df, minutesLightlyActive_df, minutesFairlyActive_df, minutesVeryActive_df = get_activity_value(df)
 
     sedentary_time = minutesSedentary_df.sum()['minutesSedentary']
@@ -222,7 +201,9 @@ def streamlit_user_activity_chart(df):
 
 
 def streamlit_user_activity_per_day_chart(df):
-
+    """
+    Generates a stacked bar chart showing the breakdown of activity types by day.
+    """
     minutesSedentary_df, minutesLightlyActive_df, minutesFairlyActive_df, minutesVeryActive_df = get_activity_value(df)
 
     merged_df = pd.merge(minutesSedentary_df, minutesLightlyActive_df, left_index=True, right_index=True, how='outer')

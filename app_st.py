@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # sleep duration
     sleep_duration = df2[df2['type'] == 'timeInBed']
-    duration = ut.minutes_in_hours_minutes(sleep_duration)
+    duration = ut.get_minutes_in_hours(sleep_duration)
 
     # Display the selected chart in an expander
     chart_options = ['Sleep', 'User Engagement']
@@ -40,24 +40,25 @@ if __name__ == "__main__":
         for idx, x in enumerate(types):
             df = pd.DataFrame()
             df = df2[df2['type'] == x]
-            df = ut.get_data_value_minutes(df)
+            df = ut.get_minutes_in_hour_minutes(df)
             pl.streamlit_sleep_charts(df, 'Time (hh mm)', titles[idx])
 
         # deep sleep
         sleep_Deep = df2[df2['type'] == 'sleep_Deep']
-        deep_sleep = ut.minutes_in_hours_minutes(sleep_Deep)
+        deep_sleep = ut.get_minutes_in_hours(sleep_Deep)
 
         # light sleep
         sleep_Light = df2[df2['type'] == 'sleep_Light']
-        light_sleep = ut.minutes_in_hours_minutes(sleep_Light)
+        light_sleep = ut.get_minutes_in_hours(sleep_Light)
 
         # rem sleep
         sleep_Rem = df2[df2['type'] == 'sleep_Rem']
-        rem_sleep = ut.minutes_in_hours_minutes(sleep_Rem)
+        rem_sleep = ut.get_minutes_in_hours(sleep_Rem)
 
         # wake sleep
         sleep_Wake = df2[df2['type'] == 'sleep_Wake']
-        awake_sleep = ut.minutes_in_hours_minutes(sleep_Wake)
+        awake_sleep = ut.get_minutes_in_hours(sleep_Wake)
+
         pl.streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, awake_sleep)
 
     elif selected_chart == 'User Engagement':
