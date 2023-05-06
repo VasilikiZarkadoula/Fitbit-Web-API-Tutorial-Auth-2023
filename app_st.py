@@ -4,6 +4,7 @@ import numpy as np
 import pymongo
 import streamlit as st
 from datetime import datetime, timedelta, time
+import altair as alt
 
 
 def get_start_sleep_time(df):
@@ -80,6 +81,30 @@ def get_data_value_score(df):
     df.sort_values(by='score', inplace=True)
     return df
 
+
+def get_steps_value(df):
+    
+    # Convert 'dateTime' column to datetime objects
+    df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
+
+    # Extract 'score' from 'value' column
+    df.loc[:, 'steps'] = df['data'].apply(lambda x: x['value'])
+
+    # Drop the 'data' and 'type' columns
+    df.drop(['data', 'type'], axis=1, inplace=True)
+
+    # Sort the DataFrame by the 'dateTime' column
+    df.sort_values(by='dateTime', ascending = True, inplace=True)
+
+    df.set_index('dateTime', inplace=True)
+
+    # Convert the 'steps' column to a numeric data type
+    df['steps'] = df['steps'].astype('float')
+
+    # Sort the DataFrame by the 'dateTime' column
+    df = df.sort_values(by='dateTime')
+    
+    return df
 
 def streamlit_sleep_layout():
     # setting the screen size
@@ -172,6 +197,128 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     plt.tight_layout()
     st.pyplot(fig)
 
+def streamlit_steps(df):
+    # Create a figure and axis object
+    fig, ax = plt.subplots(figsize=(12, 5))
+
+    # Create a scatter plot with the DataFrame
+    ax.scatter(df.index, df['steps'], color='b')
+    for dateTime, row in df.iterrows():
+        ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom', fontdict={'size': 9})
+
+    ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
+    # ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
+
+    # Create a line plot with the same x-axis values and the 'steps' column of the DataFrame
+    ax.plot(df.index, df['steps'], color='r')
+
+    # Set the x-axis tick locations and labels
+    tick_labels = df.index.strftime('%Y-%m-%d')
+    ax.set_xticks(df.index)
+    ax.set_xticklabels(tick_labels, rotation=90)
+
+    # Set the y-axis tick locations and labels
+    ax.set_yticks(
+        np.arange(df['steps'].min(), df['steps'].max() + 10000, 1000))  # Set y-axis ticks to a range of values
+    ax.set_ylim(df['steps'].min(), df['steps'].max() + 1500)  # Set y-axis limits to a range of values
+
+    # Set the x-axis label
+    ax.set_xlabel('Date')
+
+    # Set the y-axis label
+    ax.set_ylabel('Steps')
+
+    # Set the title
+    ax.set_title('Steps per Day')
+
+    # Display the plot
+    # plt.show()
+
+    # plt.show()
+
+    ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%d'))
+    plt.tight_layout()
+    # Show plot in Streamlit
+    st.pyplot(fig)
+
+def get_data_value(df):
+    # Convert 'dateTime' column to datetime objects
+    df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
+    # Set 'dateTime' as the index of the DataFrame
+    df.set_index('dateTime', inplace=True)
+    # Extract value from data - value
+    df.loc[:, 'value'] = df['data'].apply(lambda x: x['value'])
+    df.loc[:, 'dateTime'] = df['data'].apply(lambda x: x['dateTime'])
+    df.drop(['data', 'type'], axis=1, inplace=True)
+    # Drop the 'data' and 'type' columns
+    return df
+
+def get_user_engagement(totalWearTime_df, duration_df):
+    print(totalWearTime_df)
+    # # Convert 'dateTime' column to datetime objects
+    # totalWearTime_df.loc[:, 'dateTime'] = pd.to_datetime(totalWearTime_df['data'].apply(lambda x: x['dateTime']))
+    # # Set 'dateTime' as the index of the DataFrame
+    # totalWearTime_df.set_index('dateTime', inplace=True)
+    # # Extract value from data - value
+    # totalWearTime_df.loc[:, 'value'] = totalWearTime_df['data'].apply(lambda x: x['value'])
+    # totalWearTime_df.loc[:, 'dateTime'] = totalWearTime_df['data'].apply(lambda x: x['dateTime'])
+    # # Drop the 'data' and 'type' columns
+    # totalWearTime_df.drop(['data', 'type'], axis=1, inplace=True)
+
+    new_totalWearTime_df = get_data_value(totalWearTime_df)
+    new_totalWearTime_df['total_wear_time'] = round(new_totalWearTime_df['value'] / 60, 2)
+    
+    new_duration_df = duration_df.applymap(lambda x: x // 60 + (x % 60) / 100)
+
+    merged_df = pd.merge(new_totalWearTime_df, new_duration_df, left_index=True, right_index=True, how='outer')
+    merged_df.drop(['value_x'], axis=1, inplace=True)
+    merged_df = merged_df.rename(columns={'value_y': 'sleep_duration'})
+
+    # Display plot in Streamlit app
+    plt.rcParams['font.size'] = 3
+
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
+    merged_df.plot.bar(x = 'dateTime', y=['total_wear_time','sleep_duration'],ax=ax)
+    st.pyplot(fig)
+
+def get_user_activity(df2):
+    minutesSedentary_df = df2[df2['type']=='minutesSedentary']
+    minutesLightlyActive_df = df2[df2['type']=='minutesLightlyActive']
+    minutesFairlyActive_df = df2[df2['type']=='minutesFairlyActive']
+    minutesVeryActive_df = df2[df2['type']=='minutesVeryActive']
+
+    new_minutesSedentary_df = get_data_value(minutesSedentary_df)
+    new_minutesLightlyActive_df = get_data_value(minutesLightlyActive_df)
+    new_minutesFairlyActive_df = get_data_value(minutesFairlyActive_df)
+    new_minutesVeryActive_df = get_data_value(minutesVeryActive_df)
+
+    new_minutesSedentary_df['minutesSedentary'] = round(new_minutesSedentary_df['value'] / 60, 2)
+    new_minutesLightlyActive_df['minutesLightlyActive'] = round(new_minutesLightlyActive_df['value'] / 60, 2)
+    new_minutesFairlyActive_df['minutesFairlyActive'] = round(new_minutesFairlyActive_df['value'] / 60, 2)
+    new_minutesVeryActive_df['minutesVeryActive'] = round(new_minutesVeryActive_df['value'] / 60, 2)
+
+    new_minutesSedentary_df.drop(['dateTime','value'], axis=1, inplace=True)
+    new_minutesLightlyActive_df.drop(['dateTime','value'], axis=1, inplace=True)
+    new_minutesFairlyActive_df.drop(['dateTime','value'], axis=1, inplace=True)
+    new_minutesVeryActive_df.drop(['dateTime','value'], axis=1, inplace=True)
+    
+    # Calculate total time spent in each activity level
+    sedentary_time = new_minutesSedentary_df.sum()['minutesSedentary']
+    lightly_active_time = new_minutesLightlyActive_df.sum()['minutesLightlyActive']
+    fairly_active_time = new_minutesFairlyActive_df.sum()['minutesFairlyActive']
+    very_active_time = new_minutesVeryActive_df.sum()['minutesVeryActive']
+
+    # Create pie chart
+    labels = ['Very','Sedentary', 'Fairly', 'Lightly']
+    sizes = [very_active_time, sedentary_time, fairly_active_time, lightly_active_time]
+    plt.rcParams['font.size'] = 3
+
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    ax.set_title('Percentage of Time Spent in Each Activity Level')
+    st.pyplot(fig)
+
 
 if __name__ == "__main__":
 
@@ -209,6 +356,7 @@ if __name__ == "__main__":
     # efficiency
     efficiency_df = df2[df2['type'] == 'sleep_efficiency']
     efficiency_df = get_data_value_score(efficiency_df)
+    print(efficiency_df)
     y_column = efficiency_df['score']
     y_labels = efficiency_df['score']
     streamlit_sleep_charts(efficiency_df, y_column, y_labels, 'Score (/100)', 'Efficiency')
@@ -234,3 +382,16 @@ if __name__ == "__main__":
     duration = minutes_in_hours_minutes(sleep_duration)
 
     streamlit_sleep_stages_chart(duration,deep_sleep,light_sleep, rem_sleep, awake_sleep)
+
+    # steps
+    steps_df = df2[df2['type']=='steps']
+    steps_df = get_steps_value(steps_df)
+    
+    streamlit_steps(steps_df)
+ 
+    #user engagement
+    totalWearTime_df = df2[df2['type']=='totalWearTime']
+    get_user_engagement(totalWearTime_df,sleep_duration)
+
+    get_user_activity(df2)
+  
