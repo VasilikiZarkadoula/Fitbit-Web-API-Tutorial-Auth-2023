@@ -17,7 +17,7 @@ E. Setting up a Streamlit website with Python
 
 F. Visualizations with Streamlit for understanding Fitbit data
 
-G. Insightful conclusions—what you’ve learned
+G. Insightful conclusions
 
 
 
