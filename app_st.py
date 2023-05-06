@@ -8,7 +8,6 @@ import altair as alt
 
 
 def get_start_sleep_time(df):
-
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
 
@@ -26,8 +25,10 @@ def get_start_sleep_time(df):
 
     # Calculate new_hour based on conditions (if hour > 12:00 then hour -12:00 else if hour < 12:00 then hour + 12:00
     # We do this to sort the hours accordingly, e.g. 23:30 is earlier than 00:25 and 05:23 is later than 00:25
-    df['new_hour'] = df.apply(lambda row: (datetime.combine(datetime.min, row['hour']) - timedelta(hours=12)).time() if row['hour'] >= time(hour=12)
-                              else (datetime.combine(datetime.min, row['hour']) + timedelta(hours=12)).time(), axis=1)
+    df['new_hour'] = df.apply(
+        lambda row: (datetime.combine(datetime.min, row['hour']) - timedelta(hours=12)).time() if row['hour'] >= time(
+            hour=12)
+        else (datetime.combine(datetime.min, row['hour']) + timedelta(hours=12)).time(), axis=1)
 
     # Convert new_hour to string format
     df['new_hour'] = df['new_hour'].apply(lambda x: x.strftime('%H:%M'))
@@ -38,7 +39,6 @@ def get_start_sleep_time(df):
 
 
 def get_data_value_minutes(df):
-
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
     # Set 'dateTime' as the index of the DataFrame
@@ -83,7 +83,6 @@ def get_data_value_score(df):
 
 
 def get_steps_value(df):
-    
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
 
@@ -94,7 +93,7 @@ def get_steps_value(df):
     df.drop(['data', 'type'], axis=1, inplace=True)
 
     # Sort the DataFrame by the 'dateTime' column
-    df.sort_values(by='dateTime', ascending = True, inplace=True)
+    df.sort_values(by='dateTime', ascending=True, inplace=True)
 
     df.set_index('dateTime', inplace=True)
 
@@ -103,8 +102,9 @@ def get_steps_value(df):
 
     # Sort the DataFrame by the 'dateTime' column
     df = df.sort_values(by='dateTime')
-    
+
     return df
+
 
 def streamlit_sleep_layout():
     # setting the screen size
@@ -116,7 +116,6 @@ def streamlit_sleep_layout():
 
 
 def streamlit_sleep_charts(df, y_column, y_labels, ylab, title):
-
     # create a vertical bar chart using Matplotlib
     fig, ax = plt.subplots(figsize=(12, 5))
     ax.bar(df.index, y_column)
@@ -197,6 +196,7 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     plt.tight_layout()
     st.pyplot(fig)
 
+
 def streamlit_steps(df):
     # Create a figure and axis object
     fig, ax = plt.subplots(figsize=(12, 5))
@@ -207,7 +207,7 @@ def streamlit_steps(df):
         ax.text(dateTime, row['steps'], str(int(row['steps'])), ha='center', va='bottom', fontdict={'size': 9})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
-    # ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
+    ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
 
     # Create a line plot with the same x-axis values and the 'steps' column of the DataFrame
     ax.plot(df.index, df['steps'], color='r')
@@ -241,6 +241,7 @@ def streamlit_steps(df):
     # Show plot in Streamlit
     st.pyplot(fig)
 
+
 def get_data_value(df):
     # Convert 'dateTime' column to datetime objects
     df.loc[:, 'dateTime'] = pd.to_datetime(df['data'].apply(lambda x: x['dateTime']))
@@ -252,6 +253,7 @@ def get_data_value(df):
     df.drop(['data', 'type'], axis=1, inplace=True)
     # Drop the 'data' and 'type' columns
     return df
+
 
 def get_user_engagement(totalWearTime_df, duration_df):
     print(totalWearTime_df)
@@ -267,7 +269,7 @@ def get_user_engagement(totalWearTime_df, duration_df):
 
     new_totalWearTime_df = get_data_value(totalWearTime_df)
     new_totalWearTime_df['total_wear_time'] = round(new_totalWearTime_df['value'] / 60, 2)
-    
+
     new_duration_df = duration_df.applymap(lambda x: x // 60 + (x % 60) / 100)
 
     merged_df = pd.merge(new_totalWearTime_df, new_duration_df, left_index=True, right_index=True, how='outer')
@@ -278,14 +280,15 @@ def get_user_engagement(totalWearTime_df, duration_df):
     plt.rcParams['font.size'] = 3
 
     fig, ax = plt.subplots(figsize=(6.6, 2.5))
-    merged_df.plot.bar(x = 'dateTime', y=['total_wear_time','sleep_duration'],ax=ax)
+    merged_df.plot.bar(x='dateTime', y=['total_wear_time', 'sleep_duration'], ax=ax)
     st.pyplot(fig)
 
+
 def get_user_activity(df2):
-    minutesSedentary_df = df2[df2['type']=='minutesSedentary']
-    minutesLightlyActive_df = df2[df2['type']=='minutesLightlyActive']
-    minutesFairlyActive_df = df2[df2['type']=='minutesFairlyActive']
-    minutesVeryActive_df = df2[df2['type']=='minutesVeryActive']
+    minutesSedentary_df = df2[df2['type'] == 'minutesSedentary']
+    minutesLightlyActive_df = df2[df2['type'] == 'minutesLightlyActive']
+    minutesFairlyActive_df = df2[df2['type'] == 'minutesFairlyActive']
+    minutesVeryActive_df = df2[df2['type'] == 'minutesVeryActive']
 
     new_minutesSedentary_df = get_data_value(minutesSedentary_df)
     new_minutesLightlyActive_df = get_data_value(minutesLightlyActive_df)
@@ -297,11 +300,11 @@ def get_user_activity(df2):
     new_minutesFairlyActive_df['minutesFairlyActive'] = round(new_minutesFairlyActive_df['value'] / 60, 2)
     new_minutesVeryActive_df['minutesVeryActive'] = round(new_minutesVeryActive_df['value'] / 60, 2)
 
-    new_minutesSedentary_df.drop(['dateTime','value'], axis=1, inplace=True)
-    new_minutesLightlyActive_df.drop(['dateTime','value'], axis=1, inplace=True)
-    new_minutesFairlyActive_df.drop(['dateTime','value'], axis=1, inplace=True)
-    new_minutesVeryActive_df.drop(['dateTime','value'], axis=1, inplace=True)
-    
+    new_minutesSedentary_df.drop(['dateTime', 'value'], axis=1, inplace=True)
+    new_minutesLightlyActive_df.drop(['dateTime', 'value'], axis=1, inplace=True)
+    new_minutesFairlyActive_df.drop(['dateTime', 'value'], axis=1, inplace=True)
+    new_minutesVeryActive_df.drop(['dateTime', 'value'], axis=1, inplace=True)
+
     # Calculate total time spent in each activity level
     sedentary_time = new_minutesSedentary_df.sum()['minutesSedentary']
     lightly_active_time = new_minutesLightlyActive_df.sum()['minutesLightlyActive']
@@ -309,7 +312,7 @@ def get_user_activity(df2):
     very_active_time = new_minutesVeryActive_df.sum()['minutesVeryActive']
 
     # Create pie chart
-    labels = ['Very','Sedentary', 'Fairly', 'Lightly']
+    labels = ['Very', 'Sedentary', 'Fairly', 'Lightly']
     sizes = [very_active_time, sedentary_time, fairly_active_time, lightly_active_time]
     plt.rcParams['font.size'] = 3
 
@@ -378,20 +381,19 @@ if __name__ == "__main__":
     awake_sleep = minutes_in_hours_minutes(sleep_Wake)
 
     # sleep duration
-    sleep_duration = df2[df2['type'] == 'sleep_duration']
+    sleep_duration = df2[df2['type'] == 'timeInBed']
     duration = minutes_in_hours_minutes(sleep_duration)
 
-    streamlit_sleep_stages_chart(duration,deep_sleep,light_sleep, rem_sleep, awake_sleep)
+    streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, awake_sleep)
 
     # steps
-    steps_df = df2[df2['type']=='steps']
+    steps_df = df2[df2['type'] == 'steps']
     steps_df = get_steps_value(steps_df)
-    
+
     streamlit_steps(steps_df)
- 
-    #user engagement
-    totalWearTime_df = df2[df2['type']=='totalWearTime']
-    get_user_engagement(totalWearTime_df,sleep_duration)
+
+    # user engagement
+    totalWearTime_df = df2[df2['type'] == 'totalWearTime']
+    get_user_engagement(totalWearTime_df, sleep_duration)
 
     get_user_activity(df2)
-  
