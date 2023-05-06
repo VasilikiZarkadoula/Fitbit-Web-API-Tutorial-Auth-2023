@@ -1,5 +1,4 @@
 # Fitbit-Web-API-Tutorial
 
-Download zip file from https://github.com/orcasgit/python-fitbit and add the .ipynb in the folder. Instructions from https://towardsdatascience.com/using-the-fitbit-web-api-with-python-f29f119621ea
-
-
+This is a hands-on lab project on using public APIs for acquiring data from the web, storing them in NoSQL databases, and visualizing them on a web platform.
+We experimented on a task that contains Fitbit data (acquired from the Fitbit Web API), Python, MongoDB and Streamlit.
