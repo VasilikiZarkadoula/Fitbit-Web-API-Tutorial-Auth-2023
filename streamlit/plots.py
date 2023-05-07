@@ -113,10 +113,10 @@ def streamlit_steps(df):
     """
     plt.rcParams['font.size'] = 4
     fig, ax = plt.subplots(figsize=(6.6, 2.5))
-    ax.scatter(df.index, df['value'], color='b')
+    ax.scatter(df.index, df['value'], color='b', s = 10)
 
     for dateTime, row in df.iterrows():
-        ax.text(dateTime, row['value'], str(int(row['value'])), ha='center', va='bottom', fontdict={'size': 9})
+        ax.text(dateTime, row['value'], str(int(row['value'])), ha='center', va='bottom', fontdict={'size': 5})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
     ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
