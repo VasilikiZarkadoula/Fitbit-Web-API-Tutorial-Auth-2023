@@ -34,7 +34,7 @@ def streamlit_start_sleep_chart(df, y_label, title):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("")
+    st.info("This bar chart shows the distribution of sleep start time for the user. The x-axis represents the hour of the day, and the y-axis represents the date where the user went to sleep at that hour. As you can see, the user tends to go to sleep later at night, with a peak around midnight. This information can be useful for understanding the user's sleep patterns and identifying opportunities for improving sleep hygiene.")
     st.divider()
 
 def streamlit_sleep_charts(df, y_label, title):
@@ -52,8 +52,6 @@ def streamlit_sleep_charts(df, y_label, title):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("")
-    st.divider()
 
 
 def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, awake_sleep):
@@ -98,7 +96,7 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("")
+    st.info("This bar chart provides a detailed breakdown of the different stages of sleep, including light sleep, deep sleep, REM sleep, and wake time, as well as the total sleep duration. The chart is a great way to visualize sleep quality and identify patterns over time. ")
     st.divider()
 
 ######################################### user engagement charts #########################################
@@ -115,7 +113,7 @@ def streamlit_steps(df):
     ax.scatter(df.index, df['value'], color='b', s = 10)
 
     for dateTime, row in df.iterrows():
-        ax.text(dateTime, row['value'], str(int(row['value'])), ha='center', va='bottom', fontdict={'size': 5})
+        ax.text(dateTime, row['value'], str(int(row['value'])), ha='right', va='bottom', fontdict={'size': 4})
 
     ax.axhline(y=10000, color='green', linestyle='--', alpha=0.5)
     ax.axhline(y=500, color='magenta', linestyle='--', alpha=0.5)
@@ -259,7 +257,16 @@ def streamlit_user_activity_per_day_chart(df):
         }
     ).configure_legend(
         orient='top'
-    ).configure(background='#FFFFFF')
+    ).configure(
+        background='#FFFFFF'
+    ).configure_axis(
+        titleColor='black',
+        labelColor='black'
+    ).configure_title(
+        fontSize=20,
+        fontWeight='bold',
+        color='black'
+    )
     
     # Show chart using Streamlit
     st.altair_chart(chart, use_container_width=True)

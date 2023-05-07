@@ -42,6 +42,13 @@ if __name__ == "__main__":
             df = df2[df2['type'] == x]
             df = ut.get_minutes_in_hour_minutes(df)
             pl.streamlit_sleep_charts(df, 'Time (hh mm)', titles[idx])
+            if x == 'timeInBed':
+                st.info("This bar chart displays the sleep duration for each day. The y-axis represents the duration of sleep in hours, while the x-axis shows the date. The length of each bar indicates the amount of time spent sleeping for that day. This chart is useful for identifying patterns in sleep duration over time and can help individuals monitor their sleep habits to ensure they are getting enough rest.")
+            elif x == 'minutesAsleep':
+                st.info("This bar chart shows the total number of hours the user spends asleep each night. It provides a clear visualization of how the user's sleep patterns vary from night to night.")
+            elif x == 'minutesAwake':
+                st.info("This bar chart shows the total number of hours the user spends awake. It can be useful in identifying patterns of sleep disturbance and how they may be affecting the user's overall sleep quality")
+            st.divider()
 
         # deep sleep
         sleep_Deep = df2[df2['type'] == 'sleep_Deep']
