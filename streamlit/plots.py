@@ -11,8 +11,8 @@ def streamlit_sleep_layout():
     Set the screen size and create the layout for the sleep dashboard in Streamlit.
     """
     st.set_page_config(layout="wide", page_title="Fitbit Data")
-    st.title('Fitbit Sleep MongoDB')
-    st.subheader('This app is a Streamlit app that retrieve mongodb data and show it in a dataframe')
+    st.title(':blue[Fitbit Data Visualization]')
+    st.subheader('This is a Streamlit application that shows useful charts from Fitbit data stored in a MongoDB database')
 
 ######################################### sleep charts #########################################
 
@@ -60,7 +60,6 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     """
     Plot a bar chart for the different stages of sleep from given DataFrame.
     """
-    st.subheader("# This is a heading")
     # sort the dates
     duration = duration.sort_index()
     light_sleep = light_sleep.sort_index()
@@ -137,7 +136,7 @@ def streamlit_steps(df):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("A line chart showing how many steps the user did per day. There are 2 baselines, the green one in 10000 steps (high_activity) and the pink one in 500 steps (low_activity)")
+    st.info("A line chart showing how many steps the user did per day. There are 2 baselines, the green one in 10000 steps (high_activity) and the pink one in 500 steps (low_activity)")
     st.divider()
 
 
@@ -164,11 +163,8 @@ def streamlit_steps_pie(df):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("A pie chart which indicates the percentage of the days that the used had a  specific activity level.")
-    st.write("low_activity: less than 500 steps")
-    st.write("normal_activity: more than 500 steps but also less than 10000")
-    st.write("high_activity: more than 10000 steps")
-    st.write("not_wearing_it: 0 steps, which means user wasn't wearing the smartwatch")
+    st.info("A pie chart which indicates the percentage of the days that the used had a  specific activity level.")
+    st.info("low_activity: less than 500 steps\n\nnormal_activity: more than 500 steps but also less than 10000\n\nhigh_activity: more than 10000 steps\n\nnot_wearing_it: 0 steps, which means user wasn't wearing the smartwatch")
     st.divider()
 
 
@@ -194,7 +190,7 @@ def streamlit_user_engagement_chart(totalWearTime_df, duration_df):
     ax.set_title('Total wear time vs sleep duration')
     ax.set_ylabel('Hours')
     st.pyplot(fig)
-    st.write("A bar chart showing the total wear time and sleep duration per day provides a quick glance at how much time the user spends wearing their activity tracker and how much time they spend sleeping. By comparing the two bars for each day, the user can quickly see if they are getting enough sleep and if they are consistently wearing their tracker throughout the day. This information can be useful in identifying patterns and making changes to improve overall health and wellness.")
+    st.info("A bar chart showing the total wear time and sleep duration per day provides a quick glance at how much time the user spends wearing their activity tracker and how much time they spend sleeping. By comparing the two bars for each day, the user can quickly see if they are getting enough sleep and if they are consistently wearing their tracker throughout the day. This information can be useful in identifying patterns and making changes to improve overall health and wellness.")
     st.divider()
 
 
@@ -219,7 +215,7 @@ def streamlit_user_activity_chart(df):
     ax.axis('equal')
     ax.set_title('Percentage of Time Spent in Each Activity Level')
     st.pyplot(fig)
-    st.write("This pie chart shows the percentage of time spent in each activity level, including minutes spent sedentary, lightly active, fairly active, and very active. The chart provides an easy-to-understand visualization of how time is allocated across different activity levels, and can help users identify areas where they may want to increase their activity levels.")
+    st.info("This pie chart shows the percentage of time spent in each activity level, including minutes spent sedentary, lightly active, fairly active, and very active. The chart provides an easy-to-understand visualization of how time is allocated across different activity levels, and can help users identify areas where they may want to increase their activity levels.")
     st.divider()
 
 
@@ -267,5 +263,5 @@ def streamlit_user_activity_per_day_chart(df):
     
     # Show chart using Streamlit
     st.altair_chart(chart, use_container_width=True)
-    st.write("This stacked bar chart shows the breakdown of each activity type (minutesSedentary, minutesLightlyActive, minutesFairlyActive, minutesVeryActive) by day. The chart provides insight into the user's daily activity levels and can help identify trends over time")
+    st.info("This stacked bar chart shows the breakdown of each activity type (minutesSedentary, minutesLightlyActive, minutesFairlyActive, minutesVeryActive) by day. The chart provides insight into the user's daily activity levels and can help identify trends over time")
     st.divider()
