@@ -137,7 +137,7 @@ def streamlit_steps(df):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("")
+    st.write("A line chart showing how many steps the user did per day. There are 2 baselines, the green one in 10000 steps (high_activity) and the pink one in 500 steps (low_activity)")
     st.divider()
 
 
@@ -164,7 +164,11 @@ def streamlit_steps_pie(df):
 
     plt.tight_layout()
     st.pyplot(fig)
-    st.write("")
+    st.write("A pie chart which indicates the percentage of the days that the used had a  specific activity level.")
+    st.write("low_activity: less than 500 steps")
+    st.write("normal_activity: more than 500 steps but also less than 10000")
+    st.write("high_activity: more than 10000 steps")
+    st.write("not_wearing_it: 0 steps, which means user wasn't wearing the smartwatch")
     st.divider()
 
 
@@ -260,7 +264,7 @@ def streamlit_user_activity_per_day_chart(df):
     ).configure_legend(
         orient='top'
     ).configure(background='#FFFFFF')
-
+    
     # Show chart using Streamlit
     st.altair_chart(chart, use_container_width=True)
     st.write("This stacked bar chart shows the breakdown of each activity type (minutesSedentary, minutesLightlyActive, minutesFairlyActive, minutesVeryActive) by day. The chart provides insight into the user's daily activity levels and can help identify trends over time")
