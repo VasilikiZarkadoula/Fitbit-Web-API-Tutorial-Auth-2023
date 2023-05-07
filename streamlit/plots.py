@@ -22,8 +22,9 @@ def streamlit_start_sleep_chart(df, y_label, title):
     Plot a bar chart for the sleep start time from given DataFrame.
     """
     df = df.sort_values('new_hour')  # sort the DataFrame by new_hour column
-
-    fig = plt.figure(figsize=(12, 5))
+    plt.rcParams['font.size'] = 4
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
+    #fig = plt.figure(figsize=(12, 5))
     plt.bar(df.index, df['new_hour'])
     plt.xlabel('Date')
     plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90, ha='center')
@@ -33,13 +34,15 @@ def streamlit_start_sleep_chart(df, y_label, title):
 
     plt.tight_layout()
     st.pyplot(fig)
-
+    st.write("")
+    st.divider()
 
 def streamlit_sleep_charts(df, y_label, title):
     """
     Plot a bar chart for the sleep duration from given DataFrame.
     """
-    fig, ax = plt.subplots(figsize=(12, 5))
+    plt.rcParams['font.size'] = 4
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
     ax.bar(df.index, df['hours_minutes'])
     ax.set_xlabel('Date')
     plt.xticks(df.index, df.index.strftime('%Y-%m-%d'), rotation=90)
@@ -49,12 +52,15 @@ def streamlit_sleep_charts(df, y_label, title):
 
     plt.tight_layout()
     st.pyplot(fig)
+    st.write("")
+    st.divider()
 
 
 def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, awake_sleep):
     """
     Plot a bar chart for the different stages of sleep from given DataFrame.
     """
+    st.subheader("# This is a heading")
     # sort the dates
     duration = duration.sort_index()
     light_sleep = light_sleep.sort_index()
@@ -76,7 +82,8 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
     r5 = [x + bar_width for x in r4]
 
     # create the plot
-    fig, ax = plt.subplots(figsize=(12, 5))
+    plt.rcParams['font.size'] = 4
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
     ax.bar(r1, duration, width=bar_width, label='Sleep duration')
     ax.bar(r2, light_sleep, width=bar_width, label='Light Sleep')
     ax.bar(r3, deep_sleep, width=bar_width, label='Deep Sleep')
@@ -92,6 +99,8 @@ def streamlit_sleep_stages_chart(duration, deep_sleep, light_sleep, rem_sleep, a
 
     plt.tight_layout()
     st.pyplot(fig)
+    st.write("")
+    st.divider()
 
 ######################################### user engagement charts #########################################
 
@@ -102,8 +111,8 @@ def streamlit_steps(df):
     Plots a scatter plot with the steps taken per day, along with a line plot
     that connects the dots and horizontal lines at 10000 and 500 steps.
     """
-
-    fig, ax = plt.subplots(figsize=(12, 5))
+    plt.rcParams['font.size'] = 4
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
     ax.scatter(df.index, df['value'], color='b')
 
     for dateTime, row in df.iterrows():
@@ -128,6 +137,8 @@ def streamlit_steps(df):
 
     plt.tight_layout()
     st.pyplot(fig)
+    st.write("")
+    st.divider()
 
 
 def streamlit_steps_pie(df):
@@ -138,7 +149,8 @@ def streamlit_steps_pie(df):
     # count the number of occurrences of each value in the activity_level column
     value_counts = df['activity_level'].value_counts(normalize=True)
 
-    fig, ax = plt.subplots()
+    plt.rcParams['font.size'] = 4
+    fig, ax = plt.subplots(figsize=(6.6, 2.5))
     ax.pie(
         value_counts.values,
         labels=value_counts.index,
@@ -148,11 +160,12 @@ def streamlit_steps_pie(df):
     )
     ax.set_title('Percentage of activity level based on the number of steps')
     ax.set_box_aspect(0.4)  # adjust the aspect ratio of the plot to make it less zoomed in
-    fig.set_size_inches(6, 6)  # adjust the size of the plot
     fig.set_dpi(200)  # adjust the resolution of the plot
 
     plt.tight_layout()
     st.pyplot(fig)
+    st.write("")
+    st.divider()
 
 
 ####### activity charts ########
@@ -171,10 +184,14 @@ def streamlit_user_engagement_chart(totalWearTime_df, duration_df):
     merged_df.drop(['value_x'], axis=1, inplace=True)
     merged_df = merged_df.rename(columns={'value_y': 'sleep_duration'})
 
-    plt.rcParams['font.size'] = 3
+    plt.rcParams['font.size'] = 4
     fig, ax = plt.subplots(figsize=(6.6, 2.5))
     merged_df.plot.bar(x='dateTime', y=['total_wear_time', 'sleep_duration'], ax=ax)
+    ax.set_title('Total wear time vs sleep duration')
+    ax.set_ylabel('Hours')
     st.pyplot(fig)
+    st.write("A bar chart showing the total wear time and sleep duration per day provides a quick glance at how much time the user spends wearing their activity tracker and how much time they spend sleeping. By comparing the two bars for each day, the user can quickly see if they are getting enough sleep and if they are consistently wearing their tracker throughout the day. This information can be useful in identifying patterns and making changes to improve overall health and wellness.")
+    st.divider()
 
 
 def streamlit_user_activity_chart(df):
@@ -198,6 +215,8 @@ def streamlit_user_activity_chart(df):
     ax.axis('equal')
     ax.set_title('Percentage of Time Spent in Each Activity Level')
     st.pyplot(fig)
+    st.write("This pie chart shows the percentage of time spent in each activity level, including minutes spent sedentary, lightly active, fairly active, and very active. The chart provides an easy-to-understand visualization of how time is allocated across different activity levels, and can help users identify areas where they may want to increase their activity levels.")
+    st.divider()
 
 
 def streamlit_user_activity_per_day_chart(df):
@@ -233,11 +252,16 @@ def streamlit_user_activity_per_day_chart(df):
     ).properties(
         width=400,
         height=800,
-        title='Breakdown of Activity Types by Day'
+        title={
+        "text": "Breakdown of Activity Types by Day",
+        "align": "center",
+        "fontSize": 18
+        }
     ).configure_legend(
         orient='top'
-    )
+    ).configure(background='#FFFFFF')
 
     # Show chart using Streamlit
     st.altair_chart(chart, use_container_width=True)
-
+    st.write("This stacked bar chart shows the breakdown of each activity type (minutesSedentary, minutesLightlyActive, minutesFairlyActive, minutesVeryActive) by day. The chart provides insight into the user's daily activity levels and can help identify trends over time")
+    st.divider()
