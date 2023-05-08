@@ -20,7 +20,7 @@ F. Visualizations with Streamlit for understanding Fitbit data
 G. Insightful conclusions
 
  <br />
-Useful extra tutorial: https://towardsdatascience.com/using-the-fitbit-web-api-with-python-f29f119621ea
+Useful tutorial followed: https://towardsdatascience.com/using-the-fitbit-web-api-with-python-f29f119621ea
 
 <br /> <br />
 Aristotle Univeristy of Thessaloniki (AUTh) <br /> Web Mining Course <br /> Authors: Kyriaki Potamopoulou, Vasiliki Zarkadoula, Vasilis Daoulas
